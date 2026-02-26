@@ -63,7 +63,7 @@ export default function BusMapModal({ tracking, bus, driver, route, onClose }: B
         </div>
 
         {/* Map */}
-        <div style={{ height: 420 }}>
+        <div className="relative z-0" style={{ height: 420 }}>
           <MapContainer
             center={[lat, lng]}
             zoom={14}
