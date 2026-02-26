@@ -221,7 +221,7 @@ export default function StopsPageContent() {
         </div>
 
         {/* Right: Map */}
-        <div className="lg:col-span-3 rounded-lg overflow-hidden border" style={{ height: 540 }}>
+        <div className="lg:col-span-3 rounded-lg overflow-hidden border relative z-0" style={{ height: 540 }}>
           <MapContainer center={mapCenter} zoom={10} style={{ height: '100%', width: '100%' }}>
             <TileLayer
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
