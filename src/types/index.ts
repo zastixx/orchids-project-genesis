@@ -9,7 +9,7 @@ export interface User {
 
 export interface Driver {
   id: string;
-  user_id: string;
+  user_id?: string;
   employee_id: string;
   name: string;
   phone: string;
@@ -20,6 +20,12 @@ export interface Driver {
   total_trips_completed: number;
   license_number: string;
   license_expiry: string; // YYYY-MM-DD
+  // Support for alternative naming from Firebase imports
+  emp_id?: string;
+  phone_no?: string;
+  bus_id?: string;
+  route_id?: string;
+  trip_id?: string;
 }
 
 export interface Bus {
