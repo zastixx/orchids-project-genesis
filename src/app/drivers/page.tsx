@@ -40,9 +40,11 @@ const emptyDriver = (): Omit<Driver, 'id'> => ({
   license_expiry: '',
 });
 
-export default function DriversPage() {
-  const { data: driversRaw, loading } = useRealtimeData<Record<string, Driver>>('/drivers');
-  const { data: busesRaw } = useRealtimeData<Record<string, Bus>>('/buses');
+  export default function DriversPage() {
+    const { data: driversRaw, loading } = useRealtimeData<Record<string, Driver>>('/drivers');
+    console.log('Raw Drivers Data:', driversRaw);
+    const { data: busesRaw } = useRealtimeData<Record<string, Bus>>('/buses');
+
   const { data: routesRaw } = useRealtimeData<Record<string, Route>>('/routes');
   const { data: tripsRaw } = useRealtimeData<Record<string, Trip>>('/trips');
 
