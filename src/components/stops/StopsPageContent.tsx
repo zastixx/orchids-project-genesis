@@ -86,6 +86,16 @@ export default function StopsPageContent() {
   const [isFetchingAddress, setIsFetchingAddress] = useState(false);
   const [suggestedAddress, setSuggestedAddress] = useState<string | null>(null);
 
+  // --- Valhalla Route Generation States ---
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [routeStart, setRouteStart] = useState<[number, number] | null>(null);
+  const [routeEnd, setRouteEnd] = useState<[number, number] | null>(null);
+  const [isPickingStart, setIsPickingStart] = useState(false);
+  const [isPickingEnd, setIsPickingEnd] = useState(false);
+  const [isFetchingRoute, setIsFetchingRoute] = useState(false);
+  const [generatedStops, setGeneratedStops] = useState<GeneratedStop[]>([]);
+  const [routeShape, setRouteShape] = useState<[number, number][]>([]);
+
   // Clear suggestions when dialog closes
   useEffect(() => {
     if (!editStop) {
@@ -105,6 +115,17 @@ export default function StopsPageContent() {
   });
 
   const handleMapClick = useCallback(async (lat: number, lng: number) => {
+    if (isPickingStart) {
+      setRouteStart([lat, lng]);
+      setIsPickingStart(false);
+      return;
+    }
+    if (isPickingEnd) {
+      setRouteEnd([lat, lng]);
+      setIsPickingEnd(false);
+      return;
+    }
+
     if (editStop) {
       setEditStop((prev) => prev ? { ...prev, latitude: lat, longitude: lng } : null);
       
@@ -124,7 +145,133 @@ export default function StopsPageContent() {
         setIsFetchingAddress(false);
       }
     }
-  }, [editStop]);
+  }, [editStop, isPickingStart, isPickingEnd]);
+
+  // --- Valhalla Logic ---
+  const decodePolyline = (str: string, precision: number = 6) => {
+    let index = 0, lat = 0, lng = 0, coordinates = [];
+    const factor = Math.pow(10, precision);
+    while (index < str.length) {
+      let byte, shift = 0, result = 0;
+      do {
+        byte = str.charCodeAt(index++) - 63;
+        result |= (byte & 0x1f) << shift;
+        shift += 5;
+      } while (byte >= 0x20);
+      const dlat = ((result & 1) ? ~(result >> 1) : (result >> 1));
+      lat += dlat;
+      shift = 0; result = 0;
+      do {
+        byte = str.charCodeAt(index++) - 63;
+        result |= (byte & 0x1f) << shift;
+        shift += 5;
+      } while (byte >= 0x20);
+      const dlng = ((result & 1) ? ~(result >> 1) : (result >> 1));
+      lng += dlng;
+      coordinates.push([lat / factor, lng / factor] as [number, number]);
+    }
+    return coordinates;
+  };
+
+  const fetchRouteAndStops = async () => {
+    if (!routeStart || !routeEnd) {
+      toast.error('Please set start and end points');
+      return;
+    }
+    setIsFetchingRoute(true);
+    setGeneratedStops([]);
+    setRouteShape([]);
+    try {
+      const body = {
+        locations: [
+          { lat: routeStart[0], lon: routeStart[1] },
+          { lat: routeEnd[0], lon: routeEnd[1] }
+        ],
+        costing: 'auto',
+        directions_options: { units: 'km' }
+      };
+      
+      const res = await fetch('https://valhalla1.openstreetmap.de/route', {
+        method: 'POST',
+        body: JSON.stringify(body)
+      });
+      const data = await res.json();
+      
+      if (!data.trip || !data.trip.legs) {
+        toast.error('Could not find route');
+        return;
+      }
+
+      const leg = data.trip.legs[0];
+      const shape = decodePolyline(leg.shape);
+      setRouteShape(shape);
+
+      // Extract maneuvers with names
+      const maneuvers = leg.maneuvers || [];
+      const extracted: GeneratedStop[] = [];
+      const seenNames = new Set<string>();
+
+      // Filter maneuvers that have a sign or specific instructions
+      for (const m of maneuvers) {
+        let name = '';
+        if (m.sign && m.sign.exit_toward_elements) {
+          name = m.sign.exit_toward_elements[0].text;
+        } else if (m.street_names && m.street_names.length > 0) {
+          name = m.street_names[0];
+        } else {
+          // Fallback to instruction parsing for "towards X"
+          const match = m.instruction.match(/towards (.*)/i);
+          if (match) name = match[1].replace(/\.$/, '');
+        }
+
+        if (name && !seenNames.has(name) && name.length > 2) {
+          seenNames.add(name);
+          extracted.push({
+            name,
+            local_name: name, // Default to same, user can edit later
+            latitude: shape[m.begin_shape_index][0],
+            longitude: shape[m.begin_shape_index][1],
+            type: 'junction',
+            district: 'Patna', // Default
+            geofence_radius: 300,
+            selected: true,
+            instruction: m.instruction
+          });
+        }
+      }
+      setGeneratedStops(extracted);
+    } catch (err) {
+      console.error('Valhalla error:', err);
+      toast.error('Failed to fetch route');
+    } finally {
+      setIsFetchingRoute(false);
+    }
+  };
+
+  const handleImportStops = async () => {
+    const toImport = generatedStops.filter(s => s.selected);
+    if (toImport.length === 0) { toast.error('No stops selected'); return; }
+    
+    setSaving(true);
+    try {
+      let count = 0;
+      for (const s of toImport) {
+        const { selected, instruction, ...data } = s as any;
+        await createItem('/stops', data);
+        count++;
+      }
+      toast.success(`Imported ${count} stops`);
+      setIsGenerating(false);
+      setGeneratedStops([]);
+      setRouteShape([]);
+      setRouteStart(null);
+      setRouteEnd(null);
+    } catch {
+      toast.error('Failed to import some stops');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const handleOpenAdd = () => {
     setSuggestedAddress(null);
