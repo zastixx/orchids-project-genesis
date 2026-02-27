@@ -42,7 +42,6 @@ const emptyDriver = (): Omit<Driver, 'id'> => ({
 
   export default function DriversPage() {
     const { data: driversRaw, loading } = useRealtimeData<Record<string, Driver>>('/drivers');
-    console.log('Raw Drivers Data:', driversRaw);
     const { data: busesRaw } = useRealtimeData<Record<string, Bus>>('/buses');
 
   const { data: routesRaw } = useRealtimeData<Record<string, Route>>('/routes');
