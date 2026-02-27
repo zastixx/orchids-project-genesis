@@ -599,13 +599,16 @@ export default function StopsPageContent() {
 
       {/* Route Generation Dialog */}
       <Dialog open={isGenerating} onOpenChange={(o) => {
-        if (!o) {
-          setIsGenerating(false);
-          setIsPickingStart(false);
-          setIsPickingEnd(false);
-          setRouteShape([]);
-          setGeneratedStops([]);
-        }
+          if (!o) {
+            setIsGenerating(false);
+            setIsPickingStart(false);
+            setIsPickingEnd(false);
+            setRouteShape([]);
+            setGeneratedStops([]);
+            setStartSearch('');
+            setEndSearch('');
+          }
+
       }}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
