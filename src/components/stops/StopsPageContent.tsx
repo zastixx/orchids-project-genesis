@@ -618,14 +618,16 @@ export default function StopsPageContent() {
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <Label>Type</Label>
-                  <Select value={editStop.type} onValueChange={(v) => setEditStop({ ...editStop, type: v as Stop['type'] })}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="terminal">Terminal</SelectItem>
-                      <SelectItem value="junction">Junction</SelectItem>
-                      <SelectItem value="conditional">Conditional</SelectItem>
-                    </SelectContent>
-                  </Select>
+                    <Select value={editStop.type} onValueChange={(v) => setEditStop({ ...editStop, type: v as Stop['type'] })}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="terminal">Terminal</SelectItem>
+                        <SelectItem value="junction">Junction</SelectItem>
+                        <SelectItem value="conditional">Conditional</SelectItem>
+                        <SelectItem value="district">District</SelectItem>
+                      </SelectContent>
+                    </Select>
+
                 </div>
                 <div className="space-y-1">
                   <Label>District</Label>
