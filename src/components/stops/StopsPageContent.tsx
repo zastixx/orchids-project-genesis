@@ -82,6 +82,14 @@ export default function StopsPageContent() {
   const [isFetchingAddress, setIsFetchingAddress] = useState(false);
   const [suggestedAddress, setSuggestedAddress] = useState<string | null>(null);
 
+  // Clear suggestions when dialog closes
+  useEffect(() => {
+    if (!editStop) {
+      setSuggestedAddress(null);
+      setIsFetchingAddress(false);
+    }
+  }, [editStop]);
+
   const filtered = stops.filter((s) => {
     const searchLower = (search || '').toLowerCase();
     const nameMatch = (s.name || '').toLowerCase().includes(searchLower);
