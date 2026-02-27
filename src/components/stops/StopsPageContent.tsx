@@ -721,7 +721,11 @@ export default function StopsPageContent() {
                       placeholder="Lat" 
                       className="h-8 text-xs" 
                       value={routeEnd ? routeEnd[0] : ''} 
-                      onChange={(e) => setRouteEnd([parseFloat(e.target.value) || 0, routeEnd ? routeEnd[1] : 0])}
+                      onChange={(e) => {
+                        const val = parseFloat(e.target.value) || 0;
+                        setRouteEnd([val, routeEnd ? routeEnd[1] : 0]);
+                        setIsPickingEnd(false);
+                      }}
                     />
                   </div>
                   <div className="flex-1 space-y-1">
@@ -731,7 +735,11 @@ export default function StopsPageContent() {
                       placeholder="Lng" 
                       className="h-8 text-xs" 
                       value={routeEnd ? routeEnd[1] : ''} 
-                      onChange={(e) => setRouteEnd([routeEnd ? routeEnd[0] : 0, parseFloat(e.target.value) || 0])}
+                      onChange={(e) => {
+                        const val = parseFloat(e.target.value) || 0;
+                        setRouteEnd([routeEnd ? routeEnd[0] : 0, val]);
+                        setIsPickingEnd(false);
+                      }}
                     />
                   </div>
                 </div>
