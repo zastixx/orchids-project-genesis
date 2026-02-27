@@ -287,16 +287,29 @@ export default function StopsPageContent() {
           <DialogHeader>
             <DialogTitle>{editStop?.id ? 'Edit Stop' : 'Add New Stop'}</DialogTitle>
           </DialogHeader>
-          {editStop && (
-            <div className="space-y-3 py-2">
-              <div className="space-y-1">
-                <Label>Stop Name (English) *</Label>
-                <Input value={editStop.name} onChange={(e) => setEditStop({ ...editStop, name: e.target.value })} placeholder="e.g. Raxaul Bus Terminal" />
-              </div>
-              <div className="space-y-1">
-                <Label>Local Name (Hindi) *</Label>
-                <Input value={editStop.local_name} onChange={(e) => setEditStop({ ...editStop, local_name: e.target.value })} placeholder="e.g. रक्सौल बस टर्मिनल" />
-              </div>
+            {editStop && (
+              <div className="space-y-3 py-2">
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <Label>Stop Name (English) *</Label>
+                    {isFetchingAddress && <span className="text-[10px] text-blue-500 animate-pulse">Fetching address...</span>}
+                  </div>
+                  <Input value={editStop.name} onChange={(e) => setEditStop({ ...editStop, name: e.target.value })} placeholder="e.g. Raxaul Bus Terminal" />
+                  {suggestedAddress && (
+                    <button 
+                      type="button"
+                      onClick={() => setEditStop({ ...editStop, name: suggestedAddress })}
+                      className="text-[10px] text-[#1976d2] hover:underline block text-left mt-0.5"
+                    >
+                      Suggestion: {suggestedAddress} (Click to use)
+                    </button>
+                  )}
+                </div>
+                <div className="space-y-1">
+                  <Label>Local Name (Hindi) *</Label>
+                  <Input value={editStop.local_name} onChange={(e) => setEditStop({ ...editStop, local_name: e.target.value })} placeholder="e.g. रक्सौल बस टर्मिनल" />
+                </div>
+
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <Label>Type</Label>
