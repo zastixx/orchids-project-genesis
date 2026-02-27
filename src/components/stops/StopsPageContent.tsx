@@ -196,23 +196,24 @@ export default function StopsPageContent() {
           <Search size={15} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
           <Input placeholder="Search stops..." className="pl-8 h-8 text-sm" value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
-        <div className="flex gap-1.5">
-          {['all', 'terminal', 'junction', 'conditional'].map((t) => (
-            <Button
-              key={t}
-              size="sm"
-              variant={filterType === t ? 'default' : 'outline'}
-              className={cn('h-7 text-xs capitalize', filterType === t ? 'bg-[#1976d2]' : '')}
-              onClick={() => setFilterType(t)}
-            >
-              <Filter size={11} className="mr-1" />{t}
-            </Button>
-          ))}
-        </div>
+          <div className="flex gap-1.5">
+            {['all', 'terminal', 'junction', 'conditional'].map((t) => (
+              <Button
+                key={t}
+                size="sm"
+                variant={filterType === t ? 'default' : 'outline'}
+                className={cn('h-7 text-xs capitalize', filterType === t ? 'bg-[#1976d2]' : '')}
+                onClick={() => setFilterType(t)}
+              >
+                <Filter size={11} className="mr-1" />{t}
+              </Button>
+            ))}
+          </div>
           <Button onClick={handleOpenAdd} size="sm" className="bg-[#1976d2] hover:bg-[#1565c0] text-white">
             <Plus size={15} className="mr-1" /> Add Stop
           </Button>
         </div>
+
 
         {/* Split layout */}
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
