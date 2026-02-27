@@ -92,11 +92,37 @@ export default function StopsPageContent() {
     return matchSearch && matchType;
   });
 
-  const handleMapClick = useCallback((lat: number, lng: number) => {
+  const handleMapClick = useCallback(async (lat: number, lng: number) => {
     if (editStop) {
       setEditStop((prev) => prev ? { ...prev, latitude: lat, longitude: lng } : null);
+      
+      setIsFetchingAddress(true);
+      try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`);
+        const data = await res.json();
+        if (data && data.display_name) {
+          // Extract a good name: prioritized order
+          const addr = data.address || {};
+          const suggestion = addr.amenity || addr.bus_stop || addr.railway || addr.building || addr.road || addr.suburb || data.display_name.split(',')[0];
+          setSuggestedAddress(suggestion);
+        }
+      } catch (err) {
+        console.error('Failed to fetch address:', err);
+      } finally {
+        setIsFetchingAddress(false);
+      }
     }
   }, [editStop]);
+
+  const handleOpenAdd = () => {
+    setSuggestedAddress(null);
+    setEditStop(emptyStop());
+  };
+
+  const handleOpenEdit = (stop: Stop) => {
+    setSuggestedAddress(null);
+    setEditStop({ ...stop });
+  };
 
   const handleSave = async () => {
     if (!editStop) return;
