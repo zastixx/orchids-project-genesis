@@ -79,6 +79,8 @@ export default function StopsPageContent() {
   const [editStop, setEditStop] = useState<(Omit<Stop, 'id'> & { id?: string }) | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [isFetchingAddress, setIsFetchingAddress] = useState(false);
+  const [suggestedAddress, setSuggestedAddress] = useState<string | null>(null);
 
   const filtered = stops.filter((s) => {
     const searchLower = (search || '').toLowerCase();
