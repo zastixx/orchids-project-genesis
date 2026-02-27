@@ -207,11 +207,16 @@ export default function DriversPage() {
                         </td>
                         <td className="px-4 py-3">
                           <div className="flex flex-col gap-1.5">
-                            {dutyBadge(driver.duty_status)}
+                            <div className="flex items-center gap-2">
+                              {dutyBadge(driver.duty_status)}
+                              <span className="text-[11px] text-gray-400 font-medium">
+                                {driver.total_trips_completed || 0} trips
+                              </span>
+                            </div>
                             {currentTrip && (
-                              <div className="flex flex-col">
-                                <span className="text-[10px] uppercase tracking-wider text-gray-400 font-bold">Live Trip</span>
-                                <span className="text-xs text-blue-600 font-medium truncate max-w-[140px]">{currentTrip}</span>
+                              <div className="flex flex-col bg-blue-50/50 p-1.5 rounded border border-blue-100/50">
+                                <span className="text-[9px] uppercase tracking-wider text-blue-500 font-bold">Live Trip</span>
+                                <span className="text-xs text-blue-700 font-medium truncate max-w-[140px]">{currentTrip}</span>
                               </div>
                             )}
                           </div>
