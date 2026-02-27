@@ -58,7 +58,7 @@ export interface Stop {
   local_name: string;
   latitude: number;
   longitude: number;
-  type: 'terminal' | 'junction' | 'conditional';
+  type: 'terminal' | 'junction' | 'conditional' | 'district';
   district: string;
   geofence_radius?: number;
 }
