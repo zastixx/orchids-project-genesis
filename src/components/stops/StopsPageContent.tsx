@@ -1,6 +1,14 @@
 'use client';
 import { useState, useCallback, useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, Circle, Polyline, useMapEvents } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Circle, Polyline, useMapEvents, useMap } from 'react-leaflet';
+
+function MapFlyTo({ bounds }: { bounds?: L.LatLngBoundsExpression }) {
+  const map = useMap();
+  useEffect(() => {
+    if (bounds) map.fitBounds(bounds, { padding: [50, 50] });
+  }, [bounds, map]);
+  return null;
+}
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useRealtimeData } from '@/hooks/useRealtimeData';
