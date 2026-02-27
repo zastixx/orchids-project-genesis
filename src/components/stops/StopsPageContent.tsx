@@ -68,6 +68,7 @@ const BIHAR_DISTRICTS = [
 interface GeneratedStop extends Omit<Stop, 'id'> {
   selected: boolean;
   instruction?: string;
+  shapeIndex?: number;
 }
 
 const emptyStop = (): Omit<Stop, 'id'> => ({
