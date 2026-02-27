@@ -247,46 +247,108 @@ export default function StopsPageContent() {
       const shape = decodePolyline(leg.shape);
       setRouteShape(shape);
 
-      // Extract maneuvers with names
-      const maneuvers = leg.maneuvers || [];
+      // --- Overpass Integration for better stops ---
+      // Sample polyline points to query Overpass (every ~5km)
+      const sampledPoints = [];
+      const step = Math.max(1, Math.floor(shape.length / 15));
+      for (let i = 0; i < shape.length; i += step) {
+        sampledPoints.push(shape[i]);
+      }
+      if (sampledPoints[sampledPoints.length - 1] !== shape[shape.length - 1]) {
+        sampledPoints.push(shape[shape.length - 1]);
+      }
+
+      // Build Overpass query for cities, towns, and junctions near the route
+      // We search within 1000m of the sampled points
+      const aroundQueries = sampledPoints.map(p => `node(around:1000,${p[0]},${p[1]})[place~"city|town|village|hamlet"];`).join('');
+      const junctionQueries = sampledPoints.map(p => `node(around:300,${p[0]},${p[1]})[highway~"motorway_junction|junction"];`).join('');
+      
+      const overpassQuery = `[out:json][timeout:25];(
+        ${aroundQueries}
+        ${junctionQueries}
+      );out;`;
+
+      const overpassRes = await fetch('https://overpass-api.de/api/interpreter', {
+        method: 'POST',
+        body: `data=${encodeURIComponent(overpassQuery)}`
+      });
+      const overpassData = await overpassRes.json();
+      
       const extracted: GeneratedStop[] = [];
       const seenNames = new Set<string>();
 
-      // Filter maneuvers that have a sign or specific instructions
-      for (const m of maneuvers) {
-        let name = '';
-        if (m.sign && m.sign.exit_toward_elements) {
-          name = m.sign.exit_toward_elements[0].text;
-        } else if (m.street_names && m.street_names.length > 0) {
-          name = m.street_names[0];
-        } else {
-          // Fallback to instruction parsing for "towards X"
-          const match = m.instruction.match(/towards (.*)/i);
-          if (match) name = match[1].replace(/\.$/, '');
-        }
+      // Also include start and end points
+      const startName = await fetchReverseGeocode(routeStart[0], routeStart[1]) || 'Start Point';
+      const endName = await fetchReverseGeocode(routeEnd[0], routeEnd[1]) || 'End Point';
 
-        if (name && !seenNames.has(name) && name.length > 2) {
-          seenNames.add(name);
-          extracted.push({
-            name,
-            local_name: name, // Default to same, user can edit later
-            latitude: shape[m.begin_shape_index][0],
-            longitude: shape[m.begin_shape_index][1],
-            type: 'junction',
-            district: 'Patna', // Default
-            geofence_radius: 300,
-            selected: true,
-            instruction: m.instruction
-          });
+      // Function to find the index on shape closest to a point
+      const findClosestIndex = (lat: number, lon: number) => {
+        let minD = Infinity, minI = 0;
+        for (let i = 0; i < shape.length; i++) {
+          const d = Math.pow(shape[i][0] - lat, 2) + Math.pow(shape[i][1] - lon, 2);
+          if (d < minD) { minD = d; minI = i; }
+        }
+        return minI;
+      };
+
+      if (overpassData.elements) {
+        for (const el of overpassData.elements) {
+          const name = el.tags.name || el.tags['name:en'] || el.tags.place || 'Unnamed Location';
+          const type = el.tags.place === 'city' ? 'district' : 
+                       (el.tags.highway === 'motorway_junction' || el.tags.junction) ? 'junction' : 
+                       el.tags.place === 'town' ? 'junction' : 'conditional';
+          
+          if (!seenNames.has(name) && name.length > 2) {
+            seenNames.add(name);
+            extracted.push({
+              name,
+              local_name: el.tags['name:hi'] || name,
+              latitude: el.lat,
+              longitude: el.lon,
+              type: type as any,
+              district: el.tags['is_in:county'] || el.tags['addr:district'] || 'Patna',
+              geofence_radius: type === 'district' ? 1000 : 300,
+              selected: true,
+              instruction: el.tags.description || `Near ${name}`,
+              shapeIndex: findClosestIndex(el.lat, el.lon)
+            } as any);
+          }
         }
       }
+
+      // Add Start/End if not present
+      if (!seenNames.has(startName)) {
+        extracted.push({
+          name: startName, local_name: startName, latitude: routeStart[0], longitude: routeStart[1],
+          type: 'terminal', district: 'Patna', geofence_radius: 500, selected: true, instruction: 'Starting Point', shapeIndex: 0
+        } as any);
+      }
+      if (!seenNames.has(endName)) {
+        extracted.push({
+          name: endName, local_name: endName, latitude: routeEnd[0], longitude: routeEnd[1],
+          type: 'terminal', district: 'Patna', geofence_radius: 500, selected: true, instruction: 'Ending Point', shapeIndex: shape.length - 1
+        } as any);
+      }
+
+      // Sort by shape index to ensure sequential order
+      extracted.sort((a: any, b: any) => a.shapeIndex - b.shapeIndex);
+
       setGeneratedStops(extracted);
+      toast.success(`Found ${extracted.length} locations along route`);
     } catch (err) {
-      console.error('Valhalla error:', err);
-      toast.error('Failed to fetch route');
+      console.error('Extraction error:', err);
+      toast.error('Failed to fetch route or stops');
     } finally {
       setIsFetchingRoute(false);
     }
+  };
+
+  const fetchReverseGeocode = async (lat: number, lon: number) => {
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=10`);
+      const data = await res.json();
+      return data.address.city || data.address.town || data.address.village || data.address.suburb || data.display_name.split(',')[0];
+    } catch { return null; }
   };
 
   const handleImportStops = async () => {
