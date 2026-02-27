@@ -107,6 +107,12 @@ export default function StopsPageContent() {
   const [isSearchingStart, setIsSearchingStart] = useState(false);
   const [isSearchingEnd, setIsSearchingEnd] = useState(false);
 
+  // Bihar boundary check (simplified bounding box)
+  // Approx: Lat 24-28, Lng 83-88
+  const isPointInBihar = (lat: number, lng: number) => {
+    return lat >= 23.5 && lat <= 28.5 && lng >= 82.5 && lng <= 89.0;
+  };
+
   // Clear suggestions when dialog closes
   useEffect(() => {
     if (!editStop) {
@@ -129,10 +135,14 @@ export default function StopsPageContent() {
     if (!query.trim()) return;
     setIsSearching(true);
     try {
-      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`);
+      // Limit search to Bihar for better results if not specified
+      const searchQuery = query.toLowerCase().includes('bihar') ? query : `${query}, Bihar, India`;
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&limit=1`);
       const data = await res.json();
       if (data && data.length > 0) {
-        setCoords([parseFloat(data[0].lat), parseFloat(data[0].lon)]);
+        const lat = parseFloat(data[0].lat);
+        const lon = parseFloat(data[0].lon);
+        setCoords([lat, lon]);
         toast.success(`Found location: ${data[0].display_name.split(',')[0]}`);
       } else {
         toast.error('Location not found');
