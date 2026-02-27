@@ -59,6 +59,11 @@ const BIHAR_DISTRICTS = [
   'Siwan', 'Supaul', 'Vaishali'
 ];
 
+interface GeneratedStop extends Omit<Stop, 'id'> {
+  selected: boolean;
+  instruction?: string;
+}
+
 const emptyStop = (): Omit<Stop, 'id'> => ({
   name: '', local_name: '', latitude: 26.8, longitude: 84.9,
   type: 'junction', district: 'Patna', geofence_radius: 300,
