@@ -201,44 +201,45 @@ export default function StopsPageContent() {
             </Button>
           ))}
         </div>
-        <Button onClick={() => setEditStop(emptyStop())} size="sm" className="bg-[#1976d2] hover:bg-[#1565c0] text-white">
-          <Plus size={15} className="mr-1" /> Add Stop
-        </Button>
-      </div>
+          <Button onClick={handleOpenAdd} size="sm" className="bg-[#1976d2] hover:bg-[#1565c0] text-white">
+            <Plus size={15} className="mr-1" /> Add Stop
+          </Button>
+        </div>
 
-      {/* Split layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-        {/* Left: Stops list */}
-        <div className="lg:col-span-2 bg-white rounded-lg border overflow-hidden">
-          <div className="px-3 py-2 border-b bg-gray-50">
-            <p className="text-xs text-gray-500 font-medium">{filtered.length} stops</p>
-          </div>
-          <div className="overflow-y-auto" style={{ maxHeight: 520 }}>
-            {loading ? (
-              <div className="p-3 space-y-2">{[1,2,3,4].map(i => (
-                <div key={i} className="h-14 bg-gray-100 rounded animate-pulse" />
-              ))}</div>
-            ) : filtered.length === 0 ? (
-              <div className="p-8 text-center text-gray-400">
-                <MapPin size={28} className="mx-auto mb-2 opacity-40" />
-                <p className="text-sm">No stops found</p>
-              </div>
-            ) : filtered.map((stop) => (
-              <div key={stop.id} className="px-3 py-2.5 border-b last:border-0 hover:bg-gray-50 flex items-start gap-2">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-1.5 flex-wrap">
-                    <span className="font-medium text-sm truncate">{stop.name}</span>
-                    <Badge className={cn('text-xs', typeColors[stop.type] || '')} variant="outline">
-                      {stop.type}
-                    </Badge>
-                  </div>
-                  <p className="text-xs text-gray-400">{stop.local_name}</p>
-                  <p className="text-xs text-gray-400">{stop.district} · {stop.latitude?.toFixed(4)}, {stop.longitude?.toFixed(4)}</p>
+        {/* Split layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+          {/* Left: Stops list */}
+          <div className="lg:col-span-2 bg-white rounded-lg border overflow-hidden">
+            <div className="px-3 py-2 border-b bg-gray-50">
+              <p className="text-xs text-gray-500 font-medium">{filtered.length} stops</p>
+            </div>
+            <div className="overflow-y-auto" style={{ maxHeight: 520 }}>
+              {loading ? (
+                <div className="p-3 space-y-2">{[1,2,3,4].map(i => (
+                  <div key={i} className="h-14 bg-gray-100 rounded animate-pulse" />
+                ))}</div>
+              ) : filtered.length === 0 ? (
+                <div className="p-8 text-center text-gray-400">
+                  <MapPin size={28} className="mx-auto mb-2 opacity-40" />
+                  <p className="text-sm">No stops found</p>
                 </div>
-                <div className="flex gap-0.5 flex-shrink-0">
-                  <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setEditStop({ ...stop })} aria-label="Edit stop">
-                    <Pencil size={11} />
-                  </Button>
+              ) : filtered.map((stop) => (
+                <div key={stop.id} className="px-3 py-2.5 border-b last:border-0 hover:bg-gray-50 flex items-start gap-2">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="font-medium text-sm truncate">{stop.name}</span>
+                      <Badge className={cn('text-xs', typeColors[stop.type] || '')} variant="outline">
+                        {stop.type}
+                      </Badge>
+                    </div>
+                    <p className="text-xs text-gray-400">{stop.local_name}</p>
+                    <p className="text-xs text-gray-400">{stop.district} · {stop.latitude?.toFixed(4)}, {stop.longitude?.toFixed(4)}</p>
+                  </div>
+                  <div className="flex gap-0.5 flex-shrink-0">
+                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleOpenEdit(stop)} aria-label="Edit stop">
+                      <Pencil size={11} />
+                    </Button>
+
                   <Button variant="ghost" size="icon" className="h-6 w-6 text-red-500" onClick={() => setDeleteId(stop.id)} aria-label="Delete stop">
                     <Trash2 size={11} />
                   </Button>
