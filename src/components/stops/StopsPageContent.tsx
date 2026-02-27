@@ -430,6 +430,32 @@ export default function StopsPageContent() {
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
             />
             <MapClickHandler onMapClick={handleMapClick} />
+            
+            {/* Route Generation Visuals */}
+            {routeShape.length > 0 && (
+              <Polyline positions={routeShape} color="#1976d2" weight={4} opacity={0.6} dashArray="8, 8" />
+            )}
+            {routeStart && (
+              <Marker position={routeStart} icon={new L.Icon({
+                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
+                iconRetinaUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+                shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+                iconSize: [25, 41], iconAnchor: [12, 41]
+              })}>
+                <Popup>Route Start</Popup>
+              </Marker>
+            )}
+            {routeEnd && (
+              <Marker position={routeEnd} icon={new L.Icon({
+                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-orange.png',
+                iconRetinaUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png',
+                shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+                iconSize: [25, 41], iconAnchor: [12, 41]
+              })}>
+                <Popup>Route End</Popup>
+              </Marker>
+            )}
+
             {filtered.map((stop) => (
               <Marker
                 key={stop.id}
