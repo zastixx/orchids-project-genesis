@@ -125,6 +125,26 @@ export default function StopsPageContent() {
     return matchSearch && matchType;
   });
 
+  const handleAddressSearch = async (query: string, setCoords: (c: [number, number]) => void, setIsSearching: (s: boolean) => void) => {
+    if (!query.trim()) return;
+    setIsSearching(true);
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`);
+      const data = await res.json();
+      if (data && data.length > 0) {
+        setCoords([parseFloat(data[0].lat), parseFloat(data[0].lon)]);
+        toast.success(`Found location: ${data[0].display_name.split(',')[0]}`);
+      } else {
+        toast.error('Location not found');
+      }
+    } catch (err) {
+      console.error('Search error:', err);
+      toast.error('Failed to search address');
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
   const handleMapClick = useCallback(async (lat: number, lng: number) => {
     if (isPickingStart) {
       setRouteStart([lat, lng]);
