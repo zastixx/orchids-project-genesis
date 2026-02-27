@@ -48,8 +48,16 @@ const emptyDriver = (): Omit<Driver, 'id'> => ({
   const { data: routesRaw } = useRealtimeData<Record<string, Route>>('/routes');
   const { data: tripsRaw } = useRealtimeData<Record<string, Trip>>('/trips');
 
-  const drivers = objectToArray<Driver>(driversRaw);
-  const buses = objectToArray<Bus>(busesRaw);
+    const drivers = objectToArray<Driver>(driversRaw).map(d => ({
+      ...d,
+      employee_id: d.employee_id || d.emp_id || '',
+      phone: d.phone || d.phone_no || '',
+      assigned_bus_id: d.assigned_bus_id || d.bus_id || '',
+      assigned_route_id: d.assigned_route_id || d.route_id || '',
+      current_trip_id: d.current_trip_id || d.trip_id || null,
+    }));
+    const buses = objectToArray<Bus>(busesRaw);
+
   const routes = objectToArray<Route>(routesRaw);
   const trips = objectToArray<Trip>(tripsRaw);
 
