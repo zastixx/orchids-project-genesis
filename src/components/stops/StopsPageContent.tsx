@@ -539,17 +539,21 @@ export default function StopsPageContent() {
 
         {/* Right: Map */}
         <div className="lg:col-span-3 rounded-lg overflow-hidden border relative z-0" style={{ height: 540 }}>
-          <MapContainer center={mapCenter} zoom={10} style={{ height: '100%', width: '100%' }}>
-            <TileLayer
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-            />
-            <MapClickHandler onMapClick={handleMapClick} />
-            
-            {/* Route Generation Visuals */}
-            {routeShape.length > 0 && (
-              <Polyline positions={routeShape} color="#1976d2" weight={4} opacity={0.6} dashArray="8, 8" />
-            )}
+            <MapContainer center={mapCenter} zoom={10} style={{ height: '100%', width: '100%' }}>
+              <TileLayer
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+              />
+              <MapClickHandler onMapClick={handleMapClick} />
+              
+              {/* Route Generation Visuals */}
+              {routeShape.length > 0 && (
+                <>
+                  <Polyline positions={routeShape} color="#1976d2" weight={4} opacity={0.6} dashArray="8, 8" />
+                  <MapFlyTo bounds={L.polyline(routeShape).getBounds()} />
+                </>
+              )}
+
             {routeStart && (
               <Marker position={routeStart} icon={new L.Icon({
                 iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
