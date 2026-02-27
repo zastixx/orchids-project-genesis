@@ -570,6 +570,121 @@ export default function StopsPageContent() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Route Generation Dialog */}
+      <Dialog open={isGenerating} onOpenChange={(o) => {
+        if (!o) {
+          setIsGenerating(false);
+          setIsPickingStart(false);
+          setIsPickingEnd(false);
+          setRouteShape([]);
+          setGeneratedStops([]);
+        }
+      }}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Auto-generate Stops from Route</DialogTitle>
+            <DialogDescription>
+              Select start and end points on the map to find major cities, junctions, and towns along the route using Valhalla.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="grid grid-cols-2 gap-4 py-4">
+            <div className="space-y-2">
+              <Label>Starting Point</Label>
+              <div className="flex gap-2">
+                <Button 
+                  variant={isPickingStart ? "default" : "outline"} 
+                  size="sm" 
+                  className="flex-1"
+                  onClick={() => { setIsPickingStart(true); setIsPickingEnd(false); }}
+                >
+                  <MapPin size={14} className="mr-1" /> 
+                  {routeStart ? `${routeStart[0].toFixed(3)}, ${routeStart[1].toFixed(3)}` : "Pick on Map"}
+                </Button>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Ending Point</Label>
+              <div className="flex gap-2">
+                <Button 
+                  variant={isPickingEnd ? "default" : "outline"} 
+                  size="sm" 
+                  className="flex-1"
+                  onClick={() => { setIsPickingEnd(true); setIsPickingStart(false); }}
+                >
+                  <MapPin size={14} className="mr-1" />
+                  {routeEnd ? `${routeEnd[0].toFixed(3)}, ${routeEnd[1].toFixed(3)}` : "Pick on Map"}
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          {(isPickingStart || isPickingEnd) && (
+            <div className="bg-blue-50 text-blue-700 p-2 rounded-md text-sm flex items-center mb-4">
+              <Loader2 size={14} className="mr-2 animate-spin" />
+              Click on the map to set the {isPickingStart ? 'Start' : 'End'} point
+            </div>
+          )}
+
+          <div className="flex justify-center mb-4">
+             <Button 
+               onClick={fetchRouteAndStops} 
+               disabled={!routeStart || !routeEnd || isFetchingRoute}
+               className="bg-[#1976d2] hover:bg-[#1565c0] text-white"
+             >
+               {isFetchingRoute ? <><Loader2 size={16} className="mr-2 animate-spin" /> Finding Route...</> : "Find Stops along Route"}
+             </Button>
+          </div>
+
+          {generatedStops.length > 0 && (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <Label className="text-sm font-semibold">Found {generatedStops.length} Potential Stops</Label>
+                <div className="flex gap-2">
+                  <Button variant="ghost" className="h-7 px-2 text-[10px]" onClick={() => setGeneratedStops(prev => prev.map(s => ({...s, selected: true})))}>Select All</Button>
+                  <Button variant="ghost" className="h-7 px-2 text-[10px]" onClick={() => setGeneratedStops(prev => prev.map(s => ({...s, selected: false})))}>Deselect All</Button>
+                </div>
+              </div>
+              <ScrollArea className="h-48 border rounded-md p-2">
+                <div className="space-y-2">
+                  {generatedStops.map((stop, idx) => (
+                    <div key={idx} className="flex items-start gap-3 p-2 hover:bg-gray-50 rounded-md border-b last:border-0">
+                      <Checkbox 
+                        checked={stop.selected} 
+                        onCheckedChange={(checked) => {
+                          const next = [...generatedStops];
+                          next[idx].selected = !!checked;
+                          setGeneratedStops(next);
+                        }}
+                        id={`gen-stop-${idx}`}
+                      />
+                      <div className="flex-1 min-w-0">
+                        <Label htmlFor={`gen-stop-${idx}`} className="font-medium text-sm block cursor-pointer">{stop.name}</Label>
+                        <p className="text-[10px] text-gray-400 truncate">{stop.instruction}</p>
+                      </div>
+                      <div className="text-[10px] text-gray-400 flex-shrink-0">
+                        {stop.latitude.toFixed(4)}, {stop.longitude.toFixed(4)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsGenerating(false)}>Cancel</Button>
+            <Button 
+              onClick={handleImportStops} 
+              disabled={saving || generatedStops.filter(s => s.selected).length === 0}
+              className="bg-green-600 hover:bg-green-700 text-white"
+            >
+              {saving ? 'Importing...' : `Import ${generatedStops.filter(s => s.selected).length} Stops`}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
