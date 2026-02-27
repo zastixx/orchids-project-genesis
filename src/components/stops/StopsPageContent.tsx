@@ -100,6 +100,12 @@ export default function StopsPageContent() {
   const [isFetchingRoute, setIsFetchingRoute] = useState(false);
   const [generatedStops, setGeneratedStops] = useState<GeneratedStop[]>([]);
   const [routeShape, setRouteShape] = useState<[number, number][]>([]);
+  
+  // Search states for manual entry
+  const [startSearch, setStartSearch] = useState('');
+  const [endSearch, setEndSearch] = useState('');
+  const [isSearchingStart, setIsSearchingStart] = useState(false);
+  const [isSearchingEnd, setIsSearchingEnd] = useState(false);
 
   // Clear suggestions when dialog closes
   useEffect(() => {
