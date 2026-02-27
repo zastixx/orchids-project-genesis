@@ -680,7 +680,10 @@ export default function StopsPageContent() {
       </AlertDialog>
 
       {/* Route Generation Dialog */}
-      <Dialog open={isGenerating} onOpenChange={(o) => {
+      <Dialog 
+        open={isGenerating} 
+        modal={!(isPickingStart || isPickingEnd)}
+        onOpenChange={(o) => {
           if (!o) {
             setIsGenerating(false);
             setIsPickingStart(false);
@@ -690,8 +693,8 @@ export default function StopsPageContent() {
             setStartSearch('');
             setEndSearch('');
           }
-
-      }}>
+        }}
+      >
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Auto-generate Stops from Route</DialogTitle>
