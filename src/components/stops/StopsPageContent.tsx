@@ -244,11 +244,10 @@ export default function StopsPageContent() {
                     <p className="text-xs text-gray-400">{stop.local_name}</p>
                     <p className="text-xs text-gray-400">{stop.district} · {stop.latitude?.toFixed(4)}, {stop.longitude?.toFixed(4)}</p>
                   </div>
-                  <div className="flex gap-0.5 flex-shrink-0">
-                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleOpenEdit(stop)} aria-label="Edit stop">
-                      <Pencil size={11} />
-                    </Button>
-
+                <div className="flex gap-0.5 flex-shrink-0">
+                  <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleOpenEdit(stop)} aria-label="Edit stop">
+                    <Pencil size={11} />
+                  </Button>
                   <Button variant="ghost" size="icon" className="h-6 w-6 text-red-500" onClick={() => setDeleteId(stop.id)} aria-label="Delete stop">
                     <Trash2 size={11} />
                   </Button>
