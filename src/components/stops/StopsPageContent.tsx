@@ -365,9 +365,18 @@ export default function StopsPageContent() {
               </Button>
             ))}
           </div>
-          <Button onClick={handleOpenAdd} size="sm" className="bg-[#1976d2] hover:bg-[#1565c0] text-white">
-            <Plus size={15} className="mr-1" /> Add Stop
-          </Button>
+            <Button
+              onClick={() => setIsGenerating(true)}
+              size="sm"
+              variant="outline"
+              className="border-[#1976d2] text-[#1976d2] hover:bg-blue-50"
+            >
+              <RouteIcon size={15} className="mr-1" /> Generate from Route
+            </Button>
+            <Button onClick={handleOpenAdd} size="sm" className="bg-[#1976d2] hover:bg-[#1565c0] text-white">
+              <Plus size={15} className="mr-1" /> Add Stop
+            </Button>
+
         </div>
 
 
