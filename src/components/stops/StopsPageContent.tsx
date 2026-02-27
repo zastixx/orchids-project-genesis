@@ -611,56 +611,154 @@ export default function StopsPageContent() {
           <DialogHeader>
             <DialogTitle>Auto-generate Stops from Route</DialogTitle>
             <DialogDescription>
-              Select start and end points on the map to find major cities, junctions, and towns along the route using Valhalla.
+              Select start and end points manually or by clicking on the map. We'll find towns and junctions along the route.
             </DialogDescription>
           </DialogHeader>
 
-          <div className="grid grid-cols-2 gap-4 py-4">
-            <div className="space-y-2">
-              <Label>Starting Point</Label>
-              <div className="flex gap-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
+            {/* Start Point */}
+            <div className="space-y-4 border p-3 rounded-lg bg-gray-50/50">
+              <div className="flex items-center gap-2">
+                <Badge className="bg-green-100 text-green-700 hover:bg-green-100 border-green-200">Start</Badge>
+                <Label className="font-semibold text-xs uppercase tracking-wider">Starting Point</Label>
+              </div>
+              
+              <div className="space-y-3">
+                <div className="relative">
+                  <Input 
+                    placeholder="Search address (e.g. Patna)..." 
+                    className="h-8 text-xs pr-8"
+                    value={startSearch}
+                    onChange={(e) => setStartSearch(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleAddressSearch(startSearch, setRouteStart, setIsSearchingStart)}
+                  />
+                  <Button 
+                    size="icon" 
+                    variant="ghost" 
+                    className="absolute right-0 top-0 h-8 w-8"
+                    onClick={() => handleAddressSearch(startSearch, setRouteStart, setIsSearchingStart)}
+                    disabled={isSearchingStart}
+                  >
+                    {isSearchingStart ? <Loader2 size={12} className="animate-spin" /> : <Search size={12} />}
+                  </Button>
+                </div>
+
+                <div className="flex gap-2">
+                  <div className="flex-1 space-y-1">
+                    <Label className="text-[10px] text-gray-500 ml-1">Latitude</Label>
+                    <Input 
+                      type="number" 
+                      placeholder="Lat" 
+                      className="h-8 text-xs" 
+                      value={routeStart ? routeStart[0] : ''} 
+                      onChange={(e) => setRouteStart([parseFloat(e.target.value) || 0, routeStart ? routeStart[1] : 0])}
+                    />
+                  </div>
+                  <div className="flex-1 space-y-1">
+                    <Label className="text-[10px] text-gray-500 ml-1">Longitude</Label>
+                    <Input 
+                      type="number" 
+                      placeholder="Lng" 
+                      className="h-8 text-xs" 
+                      value={routeStart ? routeStart[1] : ''} 
+                      onChange={(e) => setRouteStart([routeStart ? routeStart[0] : 0, parseFloat(e.target.value) || 0])}
+                    />
+                  </div>
+                </div>
+
                 <Button 
                   variant={isPickingStart ? "default" : "outline"} 
                   size="sm" 
-                  className="flex-1"
+                  className={cn("w-full h-8 text-xs", isPickingStart && "bg-blue-600")}
                   onClick={() => { setIsPickingStart(true); setIsPickingEnd(false); }}
                 >
-                  <MapPin size={14} className="mr-1" /> 
-                  {routeStart ? `${routeStart[0].toFixed(3)}, ${routeStart[1].toFixed(3)}` : "Pick on Map"}
+                  <MapPin size={12} className="mr-1.5" /> 
+                  {isPickingStart ? "Click Map Now" : "Pick on Map"}
                 </Button>
               </div>
             </div>
-            <div className="space-y-2">
-              <Label>Ending Point</Label>
-              <div className="flex gap-2">
+
+            {/* End Point */}
+            <div className="space-y-4 border p-3 rounded-lg bg-gray-50/50">
+              <div className="flex items-center gap-2">
+                <Badge className="bg-orange-100 text-orange-700 hover:bg-orange-100 border-orange-200">End</Badge>
+                <Label className="font-semibold text-xs uppercase tracking-wider">Ending Point</Label>
+              </div>
+              
+              <div className="space-y-3">
+                <div className="relative">
+                  <Input 
+                    placeholder="Search address (e.g. Raxaul)..." 
+                    className="h-8 text-xs pr-8"
+                    value={endSearch}
+                    onChange={(e) => setEndSearch(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleAddressSearch(endSearch, setRouteEnd, setIsSearchingEnd)}
+                  />
+                  <Button 
+                    size="icon" 
+                    variant="ghost" 
+                    className="absolute right-0 top-0 h-8 w-8"
+                    onClick={() => handleAddressSearch(endSearch, setRouteEnd, setIsSearchingEnd)}
+                    disabled={isSearchingEnd}
+                  >
+                    {isSearchingEnd ? <Loader2 size={12} className="animate-spin" /> : <Search size={12} />}
+                  </Button>
+                </div>
+
+                <div className="flex gap-2">
+                  <div className="flex-1 space-y-1">
+                    <Label className="text-[10px] text-gray-500 ml-1">Latitude</Label>
+                    <Input 
+                      type="number" 
+                      placeholder="Lat" 
+                      className="h-8 text-xs" 
+                      value={routeEnd ? routeEnd[0] : ''} 
+                      onChange={(e) => setRouteEnd([parseFloat(e.target.value) || 0, routeEnd ? routeEnd[1] : 0])}
+                    />
+                  </div>
+                  <div className="flex-1 space-y-1">
+                    <Label className="text-[10px] text-gray-500 ml-1">Longitude</Label>
+                    <Input 
+                      type="number" 
+                      placeholder="Lng" 
+                      className="h-8 text-xs" 
+                      value={routeEnd ? routeEnd[1] : ''} 
+                      onChange={(e) => setRouteEnd([routeEnd ? routeEnd[0] : 0, parseFloat(e.target.value) || 0])}
+                    />
+                  </div>
+                </div>
+
                 <Button 
                   variant={isPickingEnd ? "default" : "outline"} 
                   size="sm" 
-                  className="flex-1"
+                  className={cn("w-full h-8 text-xs", isPickingEnd && "bg-blue-600")}
                   onClick={() => { setIsPickingEnd(true); setIsPickingStart(false); }}
                 >
-                  <MapPin size={14} className="mr-1" />
-                  {routeEnd ? `${routeEnd[0].toFixed(3)}, ${routeEnd[1].toFixed(3)}` : "Pick on Map"}
+                  <MapPin size={12} className="mr-1.5" />
+                  {isPickingEnd ? "Click Map Now" : "Pick on Map"}
                 </Button>
               </div>
             </div>
           </div>
 
           {(isPickingStart || isPickingEnd) && (
-            <div className="bg-blue-50 text-blue-700 p-2 rounded-md text-sm flex items-center mb-4">
-              <Loader2 size={14} className="mr-2 animate-spin" />
-              Click on the map to set the {isPickingStart ? 'Start' : 'End'} point
+            <div className="bg-blue-50 text-blue-700 px-3 py-2 rounded-md text-xs flex items-center mb-4 animate-in fade-in slide-in-from-top-1">
+              <Loader2 size={12} className="mr-2 animate-spin" />
+              <span>Please click a location on the map behind this dialog to set the <strong>{isPickingStart ? 'Starting' : 'Ending'}</strong> point.</span>
             </div>
           )}
 
-          <div className="flex justify-center mb-4">
+          <div className="flex flex-col items-center gap-2 mb-4">
              <Button 
                onClick={fetchRouteAndStops} 
                disabled={!routeStart || !routeEnd || isFetchingRoute}
-               className="bg-[#1976d2] hover:bg-[#1565c0] text-white"
+               className="bg-[#1976d2] hover:bg-[#1565c0] text-white w-full max-w-xs"
              >
-               {isFetchingRoute ? <><Loader2 size={16} className="mr-2 animate-spin" /> Finding Route...</> : "Find Stops along Route"}
+               {isFetchingRoute ? <><Loader2 size={16} className="mr-2 animate-spin" /> Generating Route...</> : "Verify Route & Find Stops"}
              </Button>
+             {routeShape.length > 0 && !isFetchingRoute && (
+               <p className="text-[10px] text-green-600 font-medium">Route displayed on map for verification</p>
+             )}
           </div>
 
           {generatedStops.length > 0 && (
